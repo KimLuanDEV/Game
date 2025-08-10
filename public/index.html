@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎰 Lucky Spin</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="game-container">
+
+  <h1>💎Lucky 777💎</h1>
+
+<div class="time-display">🕒 <span id="currentTime">--:--:--</span></div>
+
+  <div class="wallet">
+
+<div id="stats" style="margin-top: 10px; font-weight: bold; color: #ffc107;">
+  📊 Lãi: 0 xu | Lỗ: 0 xu
+</div>
+    <div> <h3>💰Số dư xu: <span id="balance">0</span> <h3>
+    <h3>💰 Jackpot: <span id="jackpot">0</span></h3>
+<progress id="jackpotProgress" max="5000" value="0" style="width: 100%;"></progress>
+
+    </div>
+
+    <div>
+    <input type="number" id="amount" placeholder="Nhập số xu">
+      <button onclick="confirmDeposit()">Nạp xu</button>
+      <button onclick="confirmWithdraw()">Rút xu</button>
+    </div> <br>
+
+    <div class="notification" id="notification"></div>
+  </div>
+
+  <form id="betForm" class="bet-section">
+    <div class="bet-box"><label>Chua🍋<input type="number" name="Chua" min="0" value="0"></label><span style="font-size: 0.8em; color: #000000">19.2% | x5</span></div>  
+    <div class="bet-box"><label>Cải🥬<input type="number" name="Cải" min="0" value="0"></label><span style="font-size: 0.8em; color: #000000">19.2% | x5</span></div>  
+    <div class="bet-box"><label>Ngô🌽<input type="number" name="Ngô" min="0" value="0"></label><span style="font-size: 0.8em; color: #000000">19.2% | x5</span></div>  
+    <div class="bet-box"><label>Rốt🥕<input type="number" name="Rốt" min="0" value="0"></label><span style="font-size: 0.8em; color: #000000">19.2% | x5</span></div> <br>
+    <div class="bet-box"><label>Mỳ🥖<input type="number" name="Mỳ" min="0" value="0"></label><span style="font-size: 0.8em; color: #000000">10% | x10</span></div>
+    <div class="bet-box"><label>Xiên🍢<input type="number" name="Xiên" min="0" value="0"></label><span style="font-size: 0.8em; color: #000000">6.67% | x15</span></div>
+    <div class="bet-box"><label>Đùi🍗<input type="number" name="Đùi" min="0" value="0"></label><span style="font-size: 0.8em; color: #000000">4% | x25</span></div>
+    <div class="bet-box"><label>Bò🥩<input type="number" name="Bò" min="0" value="0"></label><span style="font-size: 0.8em; color: #000000">2.53% | x45</span></div> <br>
+    <div id="totalBetDisplay" style="margin-top: 10px; font-weight: bold;">Tổng cược: 0 </div><br><br>
+    
+
+  </form>
+ <div>
+    <button onclick="resetBets()">🔄 Reset cược</button>
+    <button onclick="confirmClearBetHistory()">🧹 Xóa lịch sử cược</button>
+    <button onclick="confirmClearResultHistory()">🧹 Xóa lịch sử kết quả</button>
+    <button onclick="resetStats()">♻️ Reset thống kê</button>
+ </div>
+
+<div id="wheel-container">
+  <div id="wheel">
+    <!-- Các phần tử ô sẽ được thêm bằng JS -->
+  </div>
+ 
+</div>
+
+  <button style="margin-top: 15px;" onclick="confirmSpin()">🎰 Quay thưởng</button>
+
+<audio id="spinSound" src="spin.mp3"></audio>
+<audio id="winSound" src="win.mp3"></audio>
+<audio id="bigWinSound" src="bigwin.mp3"></audio>
+
+  <div class="result" id="result">Kết quả trả thưởng...</div>
+
+  <div class="history" id="history">🌡 <b>Lịch sử kết quả:</b><br></div>
+  <div class="history" id="betHistory">🧾 <b>Lịch sử đặt cược:</b><br></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
