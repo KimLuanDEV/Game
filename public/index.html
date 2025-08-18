@@ -576,7 +576,7 @@ button:hover {
 <div class="history" id="history">🌡 <b>Lịch sử kết quả:</b><br></div>
 
 <div id="suggestion" style="font-weight:bold; color:#00ccff; margin:10px 0;">
- 🔥 Hot: đang tính toán...
+ 🔥 Hot: Hệ thống đang tính toán...
  </div>
 </div>
 
@@ -1123,7 +1123,7 @@ input.addEventListener('input', updateTotalBetDisplay);
   }
 
 //auto quay
-  let autoTime = 10;
+  let autoTime = 35;
   let autoInterval;
   let pauseAfterSpin = false;
   let pauseTimer = 0;
@@ -1139,7 +1139,7 @@ input.addEventListener('input', updateTotalBetDisplay);
   pauseTimer--;
   } 
   else {
-  autoTime = 10; // reset về 35 giây
+  autoTime = 35; // reset về 35 giây
   pauseAfterSpin = false;
   countdownEl.classList.remove("blink-yellow");
   countdownEl.textContent = `⏳ Quay thưởng sau: ${autoTime} giây`;
@@ -1149,7 +1149,7 @@ input.addEventListener('input', updateTotalBetDisplay);
 // Bình thường đếm ngược 35s
   autoTime--;
   countdownEl.textContent = `⏳ Quay thưởng sau: ${autoTime} giây`;
-  if (autoTime === 7) {
+  if (autoTime === 20) {
     suggestResult();
   }
   if (autoTime <= 5) {
