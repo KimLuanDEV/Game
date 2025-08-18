@@ -1,4 +1,4 @@
-* {
+  * {
       box-sizing: border-box;
       font-family: 'Poppins', sans-serif;
     }
@@ -505,4 +505,10 @@ button:hover {
   font-size: 14px;
   margin-top: 5px;
   color: #333;
+}
+
+
+.lock-bets {
+  pointer-events: none;
+  opacity: 0.5;
 }
