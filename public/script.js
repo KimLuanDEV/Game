@@ -1,3 +1,6 @@
+let spinCount = 0;
+
+
 let wheelRotation = 0;
 let spinInterval;
 let isSpinning = false;
@@ -92,11 +95,13 @@ function withdraw(amount) {
     showNotification(`-${amount} xu đã được rút.`);
 }
 
+
 function resetBets() {
     const inputs = document.querySelectorAll('#betForm input');
     inputs.forEach(input => input.value = 0);
     updateTotalBetDisplay(); // thêm dòng này
 }
+
 
 function confirmClearBetHistory() {
     if (confirm("Bạn có chắc muốn xóa lịch sử đặt cược?")) {
@@ -195,13 +200,14 @@ function spinWheel() {
     const randomOffset = Math.random() * anglePerSegment; // giúp kết quả trông tự nhiên hơn
 
     // Mục tiêu là đưa ô trúng về vị trí 270 độ (dưới kim đỏ)
-    const targetAngle = 270 - (selectedIndex * anglePerSegment + anglePerSegment / 2);
+    const targetAngle = (360 - (selectedIndex * anglePerSegment + anglePerSegment / 2) % 360);
 
     // Tính góc quay tiếp theo, cộng thêm số vòng quay để hiệu ứng đẹp hơn
     const extraSpins = 5;
     const targetRotation = 360 * extraSpins + targetAngle;
 
     wheelRotation += targetRotation;
+
 
 
 
@@ -261,7 +267,12 @@ function spinWheel() {
 
 
 
-            resultEl.textContent = `🎉 Kết quả: ${selected.name} ${selected.icon} - ${outcome}`;
+            if (totalBet > 0) {
+                resultEl.textContent = `🎉 Kết quả: ${selected.name} ${selected.icon} - ${outcome}`;
+            } else {
+                resultEl.textContent = `🎉 Kết quả: ${selected.name} ${selected.icon}`;
+            }
+
 
             // Bật sáng cả ô đặt cược trúng
             const winningInput = document.querySelector(`input[name="${selected.name}"]`);
@@ -271,6 +282,13 @@ function spinWheel() {
                     betBox.classList.add('highlight-win');
                     setTimeout(() => {
                         betBox.classList.remove('highlight-win');
+
+                        //Tăng số phiên quay.
+                        spinCount++;
+                        document.getElementById("spinCounter").textContent = `🎯 Phiên quay: ${spinCount}`;
+
+                        //Reset cược.
+                        resetBets();
                     }, 5000);
                 }
             }
@@ -286,13 +304,15 @@ function spinWheel() {
                 resultEl.classList.remove("big-win-effect", "small-win-effect");
             }, 2000);
 
-            let betLog = `${new Date().toLocaleTimeString()} - Cược: `;
-            for (let key in bets) {
-                const val = parseFloat(bets[key]) || 0;
-                if (val > 0) betLog += `${key}: ${val} xu, `;
+            if (totalBet > 0) {
+                let betLog = `${new Date().toLocaleTimeString()} - Cược: `;
+                for (let key in bets) {
+                    const val = parseFloat(bets[key]) || 0;
+                    if (val > 0) betLog += `${key}: ${val} xu, `;
+                }
+                betLog += `→ Kết quả: ${selected.name} ${selected.icon} - ${outcome}`;
+                betHistoryEl.innerHTML += `🧾 ${betLog}<br>`;
             }
-            betLog += `→ Kết quả: ${selected.name} ${selected.icon} - ${outcome}`;
-            betHistoryEl.innerHTML += `🧾 ${betLog}<br>`;
         }
     }, 1000);
 }
@@ -348,10 +368,60 @@ function confirmSpin() {
 
 }
 
+//auto quay
+let autoTime = 7;
+let autoInterval;
+let pauseAfterSpin = false;
+let pauseTimer = 0;
+
+function startAutoSpinTimer() {
+    autoInterval = setInterval(() => {
+        const countdownEl = document.getElementById("autoCountdown");
+
+        // Nếu đang trong thời gian chờ sau khi quay
+        if (pauseAfterSpin) {
+            if (pauseTimer > 0) {
+                countdownEl.textContent = `⏳ Đang chờ kết quả... ${pauseTimer}s`;
+                countdownEl.classList.add("blink-yellow"); // vàng nhấp nháy
+                pauseTimer--;
+            } else {
+                autoTime = 7; // reset về 35 giây
+                pauseAfterSpin = false;
+                countdownEl.classList.remove("blink-yellow");
+                countdownEl.textContent = `⏳ Quay thưởng sau: ${autoTime} giây`;
+            }
+            return;
+        }
+
+        // Bình thường đếm ngược 35s
+        autoTime--;
+        countdownEl.textContent = `⏳ Quay thưởng sau: ${autoTime} giây`;
+
+        if (autoTime <= 5) {
+            countdownEl.classList.add("blink"); // đỏ nhấp nháy
+        } else {
+            countdownEl.classList.remove("blink");
+        }
+
+        if (autoTime <= 0) {
+            if (!isSpinning) {
+                spinWheel(); // quay luôn dù không cược
+            }
+
+            // Sau khi quay thì pause 4 giây
+            pauseAfterSpin = true;
+            pauseTimer = 4;
+            countdownEl.classList.remove("blink"); // tắt đỏ nhấp nháy
+        }
+    }, 1000);
+}
+
 window.onload = function () {
     updateBalanceDisplay();
     updateJackpotDisplay();
+    startAutoSpinTimer();
 };
+
 
 
 function showJackpotEffect() {
@@ -430,3 +500,31 @@ function updateJackpotDisplay() {
 if (jackpot >= JACKPOT_THRESHOLD) {
     document.querySelector('button[onclick="confirmSpin()"]').classList.add('glow');
 }
+
+
+// --- CHIP CHỌN TIỀN CƯỢC ---
+let selectedChipValue = 0;
+
+// Khi chọn chip
+document.querySelectorAll(".chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+        document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+        chip.classList.add("active");
+        selectedChipValue = parseInt(chip.dataset.value);
+        showNotification(`💰 Đã chọn chip ${selectedChipValue} xu`);
+    });
+});
+
+// Khi click vào ô cược
+document.querySelectorAll(".bet-cell").forEach(cell => {
+    cell.addEventListener("click", () => {
+        if (selectedChipValue > 0) {
+            let amountSpan = cell.querySelector(".bet-amount");
+            let current = parseInt(amountSpan.textContent) || 0;
+            amountSpan.textContent = current + selectedChipValue;
+            updateTotalBetDisplay();
+        } else {
+            showNotification("⚠️ Hãy chọn chip trước khi đặt cược!");
+        }
+    });
+});
