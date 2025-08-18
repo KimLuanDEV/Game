@@ -284,7 +284,7 @@ function confirmSpin() {
 }
 
 //auto quay
-let autoTime = 7;
+let autoTime = 35;
 let autoInterval;
 let pauseAfterSpin = false;
 let pauseTimer = 0;
@@ -300,7 +300,7 @@ function startAutoSpinTimer() {
                 pauseTimer--;
             }
             else {
-                autoTime = 7; // reset về 35 giây
+                autoTime = 35; // reset về 35 giây
                 pauseAfterSpin = false;
                 countdownEl.classList.remove("blink-yellow");
                 countdownEl.textContent = `⏳ Quay thưởng sau: ${autoTime} giây`;
