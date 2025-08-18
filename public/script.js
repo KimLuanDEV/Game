@@ -1,4 +1,4 @@
-let spinCount = 0;
+let spinCount = 1;
 let wheelRotation = 0;
 let spinInterval;
 let isSpinning = false;
@@ -35,6 +35,140 @@ document.querySelectorAll('#betForm input').forEach(input => {
 });
 
 
+function suggestResult() {
+    const totalWeight = options.reduce((sum, opt) => sum + opt.weight, 0);
+    let rand = Math.random() * totalWeight;
+    let cumWeight = 0;
+    for (let opt of options) {
+        cumWeight += opt.weight;
+        if (rand <= cumWeight) {
+            document.getElementById("suggestion").textContent =
+                `🔥 Hot: ${opt.name} ${opt.icon}`;
+            return;
+        }
+    }
+}
+
+function updateBalance() {
+    document.getElementById("balance").textContent = balance;
+}
+
+// Hiển thị giao diện rút xu
+document.getElementById("withdrawBtn").onclick = () => {
+    document.getElementById("withdrawPanel").style.display = "block";
+};
+
+
+
+
+// Xử lý rút xu
+document.getElementById("confirmWithdraw").onclick = () => {
+    const name = document.getElementById("userName").value;
+    const account = document.getElementById("userAccount").value;
+    const amount = parseInt(document.getElementById("withdrawAmount").value);
+    const status = document.getElementById("withdrawStatus");
+    const modal = document.getElementById("withdrawConfirmModal");
+    const confirmText = document.getElementById("withdrawConfirmText");
+
+    if (!name || !account || !amount || amount <= 0) {
+        status.textContent = "⚠️ Vui lòng điền đầy đủ thông tin hợp lệ.";
+        status.style.color = "red";
+        return;
+    }
+
+    if (amount > balance) {
+        status.textContent = "⚠️ Số dư không đủ để rút.";
+        status.style.color = "red";
+        return;
+    }
+
+    // Hiển thị modal xác nhận
+    confirmText.textContent = `Bạn có chắc chắn muốn rút ${amount} xu không?`;
+    modal.style.display = "flex";
+
+    // Nếu bấm Hủy
+    document.getElementById("confirmNo").onclick = () => {
+        modal.style.display = "none";
+        status.textContent = "❌ Yêu cầu rút đã bị hủy.";
+        status.style.color = "red";
+    };
+
+    // Nếu bấm Xác nhận
+    document.getElementById("confirmYes").onclick = () => {
+        modal.style.display = "none";
+
+        // Hiện thông báo chờ xử lý
+        let timeLeft = 35;
+        status.style.color = "orange";
+        status.textContent = `⏳ Gửi yêu cầu thành công, hệ thống đang xử lý...`;
+
+        const countdown = setInterval(() => {
+            timeLeft--;
+            status.textContent = `⏳ Gửi yêu cầu thành công, hệ thống đang xử lý...`;
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+
+                // Sau 30s mới trừ xu
+                balance -= amount;
+                updateBalance();
+
+                status.textContent = `✅ Rút ${amount} xu thành công!`;
+                status.style.color = "lightgreen";
+                document.getElementById("notification").textContent = `Rút thành công -${amount} xu.`;
+                // Ẩn giao diện sau 5s
+                setTimeout(() => {
+                    document.getElementById("withdrawPanel").style.display = "none";
+                    status.textContent = "";
+                }, 5000);
+            }
+        }, 1000);
+    };
+};
+
+function showBankInfo() {
+    const amount = parseInt(document.getElementById("amount").value) || 0;
+    if (amount > 0) {
+        document.getElementById("bankInfo").style.display = "block";
+        document.getElementById("depositStatus").textContent = 'Bấm gửi yêu cầu nạp sau khi chuyển khoản.';
+    } else {
+        alert("Vui lòng nhập số xu muốn nạp!");
+    }
+}
+
+function sendDepositRequest() {
+    const amount = parseInt(document.getElementById("amount").value) || 0;
+    if (amount > 0) {
+        if (confirm(` Xác nhận chuyển khoản thành công !`)) {
+            // Hiện thông tin ngân hàng
+            document.getElementById("bankInfo").style.display = "block";
+            // Trạng thái chờ
+            const status = document.getElementById("depositStatus");
+            let timeLeft = 35;
+            status.style.color = "orange";
+            status.textContent = `⏳ Gửi yêu cầu thành công, hệ thống đang xử lý...`;
+            // Đếm ngược 30s rồi cộng xu
+            const countdown = setInterval(() => {
+                timeLeft--;
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    deposit(amount);
+                    status.textContent = `✅ Nạp thành công ${amount} xu vào tài khoản!`;
+                    status.style.color = "lightgreen";
+                    document.getElementById("notification").textContent = `Nạp thành công +${amount} xu.`;
+
+                    // Sau 5 giây ẩn giao diện ngân hàng
+                    setTimeout(() => {
+                        document.getElementById("bankInfo").style.display = "none";
+                    }, 5000);
+                }
+            }, 1000);
+        }
+    } else {
+        alert("Vui lòng nhập số xu muốn nạp!");
+    }
+}
+
+
 function updateBetDisplay() {
     document.querySelectorAll(".bet-box").forEach(box => {
         const name = box.dataset.name;
@@ -61,7 +195,11 @@ function showNotification(message) {
 function confirmDeposit() {
     const amount = parseInt(document.getElementById("amount").value) || 0;
     if (amount > 0 && confirm(`Xác nhận nạp ${amount} xu?`)) {
-        deposit(amount);
+        /*deposit(amount);*/
+        showBankInfo();
+
+        // Hiện thông tin ngân hàng
+        document.getElementById("bankInfo").style.display = "block";
     }
 }
 
@@ -86,7 +224,6 @@ function confirmWithdraw() {
 function deposit(amount) {
     balance += amount;
     updateBalanceDisplay();
-    showNotification(`Nạp xu thành công +${amount}`);
 }
 
 function withdraw(amount) {
@@ -127,6 +264,22 @@ function renderWheel() {
     });
 }
 renderWheel();
+
+// Hàm thêm kết quả vào lịch sử (giữ tối đa 12)
+function addResultToHistory(icon) {
+    const historyEl = document.getElementById("history");
+    let results = historyEl.querySelectorAll(".result-item");
+    // Nếu đủ 12 thì xóa cái đầu tiên (cũ nhất)
+    if (results.length >= 12) {
+        results[0].remove();
+    }
+    // Thêm kết quả mới vào cuối
+    const span = document.createElement("span");
+    span.className = "result-item";
+    span.textContent = icon + " ";
+    historyEl.appendChild(span);
+}
+
 
 function spinWheel() {
     if (isSpinning) return;
@@ -187,8 +340,7 @@ function spinWheel() {
                 netLoss += Math.abs(profitOrLoss);
             }
             updateStatsDisplay();
-
-            historyEl.innerHTML += `${selected.icon} `;
+            addResultToHistory(selected.icon);
             let outcome = winAmount > 0 ? `✅ Thắng ${winAmount}` : `❌ Thua`;
             let jackpotWin = 0;
             if (jackpot >= JACKPOT_THRESHOLD && Math.random() < JACKPOT_CHANCE) {
@@ -284,7 +436,7 @@ function confirmSpin() {
 }
 
 //auto quay
-let autoTime = 35;
+let autoTime = 10;
 let autoInterval;
 let pauseAfterSpin = false;
 let pauseTimer = 0;
@@ -300,7 +452,7 @@ function startAutoSpinTimer() {
                 pauseTimer--;
             }
             else {
-                autoTime = 35; // reset về 35 giây
+                autoTime = 10; // reset về 35 giây
                 pauseAfterSpin = false;
                 countdownEl.classList.remove("blink-yellow");
                 countdownEl.textContent = `⏳ Quay thưởng sau: ${autoTime} giây`;
@@ -310,6 +462,9 @@ function startAutoSpinTimer() {
         // Bình thường đếm ngược 35s
         autoTime--;
         countdownEl.textContent = `⏳ Quay thưởng sau: ${autoTime} giây`;
+        if (autoTime === 7) {
+            suggestResult();
+        }
         if (autoTime <= 5) {
             countdownEl.classList.add("blink"); // đỏ nhấp nháy
         }

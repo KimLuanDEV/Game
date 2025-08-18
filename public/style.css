@@ -1,4 +1,4 @@
-  * {
+* {
       box-sizing: border-box;
       font-family: 'Poppins', sans-serif;
     }
@@ -378,13 +378,14 @@ button:hover {
   padding: 20px;
   margin: 40px auto;
   max-width: 1200px;
-  background: rgba(0, 0, 0, 0.7);
+  background: #000;  /* NỀN ĐEN */
   box-shadow: 0 0 25px 5px gold, inset 0 0 15px #fff5cc;
   display: flex;
   flex-direction: row; /* <-- CHIA NGANG */
   gap: 25px;
   justify-content: space-between;
   align-items: flex-start;
+  border-radius: 20px;    /* bo góc đẹp hơn */
 }
 
 /* Bên trái (vòng quay + kết quả) */
@@ -511,4 +512,31 @@ button:hover {
 .lock-bets {
   pointer-events: none;
   opacity: 0.5;
+}
+
+#bankInfo {
+  background: linear-gradient(145deg, #111, #222);
+  border: 2px solid gold;
+  border-radius: 12px;
+  padding: 15px;
+  color: #fff;
+  font-size: 1.1em;
+  box-shadow: 0 0 15px rgba(255,215,0,0.3);
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+#withdrawPanel {
+  background: linear-gradient(145deg, #111, #222);
+  border: 2px solid gold;
+  border-radius: 12px;
+  padding: 15px;
+  color: #fff;
+  font-size: 1.1em;
+  box-shadow: 0 0 15px rgba(255,215,0,0.3);
+  animation: fadeIn 0.5s ease;
 }

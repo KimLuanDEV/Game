@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -391,13 +389,14 @@ button:hover {
   padding: 20px;
   margin: 40px auto;
   max-width: 1200px;
-  background: rgba(0, 0, 0, 0.7);
+  background: #000;  /* NỀN ĐEN */
   box-shadow: 0 0 25px 5px gold, inset 0 0 15px #fff5cc;
   display: flex;
   flex-direction: row; /* <-- CHIA NGANG */
   gap: 25px;
   justify-content: space-between;
   align-items: flex-start;
+  border-radius: 20px;    /* bo góc đẹp hơn */
 }
 
 /* Bên trái (vòng quay + kết quả) */
@@ -526,6 +525,34 @@ button:hover {
   opacity: 0.5;
 }
 
+#bankInfo {
+  background: linear-gradient(145deg, #111, #222);
+  border: 2px solid gold;
+  border-radius: 12px;
+  padding: 15px;
+  color: #fff;
+  font-size: 1.1em;
+  box-shadow: 0 0 15px rgba(255,215,0,0.3);
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+#withdrawPanel {
+  background: linear-gradient(145deg, #111, #222);
+  border: 2px solid gold;
+  border-radius: 12px;
+  padding: 15px;
+  color: #fff;
+  font-size: 1.1em;
+  box-shadow: 0 0 15px rgba(255,215,0,0.3);
+  animation: fadeIn 0.5s ease;
+}
+
+
   </style>
 </head>
 <body>
@@ -547,6 +574,10 @@ button:hover {
 </div>
 <div class="result" id="result">Kết quả trả thưởng...</div>
 <div class="history" id="history">🌡 <b>Lịch sử kết quả:</b><br></div>
+
+<div id="suggestion" style="font-weight:bold; color:#00ccff; margin:10px 0;">
+ 🔥 Hot: đang tính toán...
+ </div>
 </div>
 
 
@@ -568,6 +599,7 @@ button:hover {
     <div class="chip" data-value="50">💰50</div>
     <div class="chip" data-value="100">💰100</div>
     <div class="chip" data-value="1000">💰1000</div>
+    <div class="chip" data-value="10000">💰10000</div>
   </div>
 
   <div id="totalBetDisplay" style="margin-top: 10px; font-weight: bold;">Tổng cược: 0</div>
@@ -588,49 +620,73 @@ button:hover {
     <progress id="jackpotProgress" max="5000" value="0" style="width: 100%;"></progress>
     </div>
     <div>
-    <input type="number" id="amount" placeholder="Nhập số xu">
+    <input type="number" id="amount" placeholder="Nhập số xu muốn nạp">
       <button onclick="confirmDeposit()">Nạp xu</button>
-      <button onclick="confirmWithdraw()">Rút xu</button>
+      <button id="withdrawBtn" onclick="confirmWithdraw()">Rút xu</button>
     </div> <br>
 
     <div class="notification" id="notification"></div>
   </div>
 
  
+  
+  <div class="history" id="betHistory">🧾 <b>Lịch sử đặt cược:</b><br></div>
+
+<div id="bankInfo" style="display:none; margin-top:15px; text-align:left;">
+  <h3>🏦 Thông tin nạp tiền</h3>
+  <p><b>Ngân hàng:</b> Techcombank</p>
+  <p><b>Số tài khoản:</b> 9436789999</p>
+  <p><b>Chủ tài khoản:</b> Phan Văn Tuấn</p>
+  <p><b>Nội dung:</b> NAP KimDogCat</p>
+  <p id="depositStatus" style="color:orange; font-weight:bold; margin-top:10px;">Bấm gửi yêu cầu nạp sau khi chuyển khoản.</p>
+  <button onclick="sendDepositRequest()">📨 Gửi yêu cầu nạp</button>
+</div>
 
 
+<div id="withdrawPanel" style="display:none; background:#222; color:white; padding:20px; border-radius:10px;">
+  <h3>Thông tin rút xu</h3>
+  <label>Tên người dùng:</label><br>
+  <input type="text" id="userName" placeholder="Nhập tên chủ tài khoản"><br><br>
 
-
- 
-
-
-
+  <label>Tên ngân hàng:</label><br>
+  <input type="text" id="bankName" placeholder="Nhập tên ngân hàng"><br><br>
+  
+  <label>Số tài khoản:</label><br>
+  <input type="text" id="userAccount" placeholder="Nhập số tài khoản"><br><br>
+  
+  <label>Số xu muốn rút:</label><br>
+  <input type="number" id="withdrawAmount" placeholder="Nhấp số xu"><br><br>
+  
+  <button id="confirmWithdraw">Gửi yêu cầu rút xu</button>
+  <p id="withdrawStatus"></p>
+</div>
 
 
 <audio id="spinSound" src="spin.mp3"></audio>
 <audio id="winSound" src="win.mp3"></audio>
 <audio id="bigWinSound" src="bigwin.mp3"></audio>
 
- 
-
-  
-  <div class="history" id="betHistory">🧾 <b>Lịch sử đặt cược:</b><br></div>
-
-
-
- <div>
-    <button onclick="resetBets()">🔄 Reset cược</button>
-    <button onclick="confirmClearBetHistory()">🧹 Xóa lịch sử cược</button>
-    <button onclick="confirmClearResultHistory()">🧹 Xóa lịch sử kết quả</button>
-    <button onclick="resetStats()">♻️ Reset thống kê</button>
- </div>
 
 
 </div>
 
+
+<!-- Modal xác nhận rút xu -->
+<div id="withdrawConfirmModal" class="modal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:1000;">
+  <div style="background:#222; color:#fff; padding:20px; border-radius:12px; text-align:center; width:320px;">
+    <h3>⚠️ Xác nhận rút xu</h3>
+    <p id="withdrawConfirmText">Bạn có chắc chắn muốn rút ... xu?</p>
+    <div style="margin-top:15px; display:flex; justify-content:space-around;">
+      <button id="confirmYes" style="padding:8px 16px; background:green; color:#fff; border:none; border-radius:8px;">Xác nhận</button>
+      <button id="confirmNo" style="padding:8px 16px; background:red; color:#fff; border:none; border-radius:8px;">Hủy</button>
+    </div>
+  </div>
+</div>
+
+
 <script>
 
-let spinCount = 0;
+let spinCount = 1;
 let wheelRotation = 0;
 let spinInterval;
 let isSpinning = false;
@@ -667,6 +723,140 @@ input.addEventListener('input', updateTotalBetDisplay);
 });
 
 
+  function suggestResult() {
+  const totalWeight = options.reduce((sum, opt) => sum + opt.weight, 0);
+  let rand = Math.random() * totalWeight;
+  let cumWeight = 0;
+  for (let opt of options) {
+  cumWeight += opt.weight;
+  if (rand <= cumWeight) {
+  document.getElementById("suggestion").textContent =
+  `🔥 Hot: ${opt.name} ${opt.icon}`;
+  return;
+  }
+  }
+}
+
+  function updateBalance() {
+  document.getElementById("balance").textContent = balance;
+}
+
+// Hiển thị giao diện rút xu
+  document.getElementById("withdrawBtn").onclick = () => {
+  document.getElementById("withdrawPanel").style.display = "block";
+};
+
+
+
+
+// Xử lý rút xu
+  document.getElementById("confirmWithdraw").onclick = () => {
+  const name = document.getElementById("userName").value;
+  const account = document.getElementById("userAccount").value;
+  const amount = parseInt(document.getElementById("withdrawAmount").value);
+  const status = document.getElementById("withdrawStatus");
+  const modal = document.getElementById("withdrawConfirmModal");
+  const confirmText = document.getElementById("withdrawConfirmText");
+
+  if (!name || !account || !amount || amount <= 0) {
+    status.textContent = "⚠️ Vui lòng điền đầy đủ thông tin hợp lệ.";
+    status.style.color = "red";
+    return;
+  }
+
+  if (amount > balance) {
+    status.textContent = "⚠️ Số dư không đủ để rút.";
+    status.style.color = "red";
+    return;
+  }
+
+// Hiển thị modal xác nhận
+   confirmText.textContent = `Bạn có chắc chắn muốn rút ${amount} xu không?`;
+   modal.style.display = "flex";
+
+// Nếu bấm Hủy
+   document.getElementById("confirmNo").onclick = () => {
+   modal.style.display = "none";
+   status.textContent = "❌ Yêu cầu rút đã bị hủy.";
+   status.style.color = "red";
+};
+
+// Nếu bấm Xác nhận
+   document.getElementById("confirmYes").onclick = () => {
+   modal.style.display = "none";
+
+// Hiện thông báo chờ xử lý
+   let timeLeft = 35;
+   status.style.color = "orange";
+   status.textContent = `⏳ Gửi yêu cầu thành công, hệ thống đang xử lý...`;
+
+   const countdown = setInterval(() => {
+   timeLeft--;
+   status.textContent = `⏳ Gửi yêu cầu thành công, hệ thống đang xử lý...`;
+   if (timeLeft <= 0) {
+   clearInterval(countdown);
+
+// Sau 30s mới trừ xu
+   balance -= amount;
+   updateBalance();
+
+   status.textContent = `✅ Rút ${amount} xu thành công!`;
+   status.style.color = "lightgreen";
+   document.getElementById("notification").textContent = `Rút thành công -${amount} xu.`;
+// Ẩn giao diện sau 5s
+   setTimeout(() => {
+   document.getElementById("withdrawPanel").style.display = "none";
+   status.textContent = "";
+   }, 5000);
+   }
+   }, 1000);
+   };
+};
+
+  function showBankInfo() {
+  const amount = parseInt(document.getElementById("amount").value) || 0;
+  if (amount > 0) {
+  document.getElementById("bankInfo").style.display = "block";
+  document.getElementById("depositStatus").textContent = 'Bấm gửi yêu cầu nạp sau khi chuyển khoản.';
+  } else {
+  alert("Vui lòng nhập số xu muốn nạp!");
+  }
+}
+
+  function sendDepositRequest() {
+  const amount = parseInt(document.getElementById("amount").value) || 0;
+  if (amount > 0) {
+  if (confirm(` Xác nhận chuyển khoản thành công !`)) {
+  // Hiện thông tin ngân hàng
+  document.getElementById("bankInfo").style.display = "block";
+  // Trạng thái chờ
+  const status = document.getElementById("depositStatus");
+  let timeLeft = 35;  
+  status.style.color = "orange";
+  status.textContent = `⏳ Gửi yêu cầu thành công, hệ thống đang xử lý...`;
+  // Đếm ngược 30s rồi cộng xu
+  const countdown = setInterval(() => {
+  timeLeft--;
+  if (timeLeft <= 0) {
+  clearInterval(countdown);
+  deposit(amount);
+  status.textContent = `✅ Nạp thành công ${amount} xu vào tài khoản!`;
+  status.style.color = "lightgreen";
+  document.getElementById("notification").textContent = `Nạp thành công +${amount} xu.`;
+
+  // Sau 5 giây ẩn giao diện ngân hàng
+  setTimeout(() => {
+  document.getElementById("bankInfo").style.display = "none";
+  }, 5000);
+  }
+  }, 1000);
+  }
+  } else {
+  alert("Vui lòng nhập số xu muốn nạp!");
+  }
+}
+
+
   function updateBetDisplay() {
   document.querySelectorAll(".bet-box").forEach(box => {
   const name = box.dataset.name;
@@ -693,7 +883,11 @@ input.addEventListener('input', updateTotalBetDisplay);
   function confirmDeposit() {
   const amount = parseInt(document.getElementById("amount").value) || 0;
   if (amount > 0 && confirm(`Xác nhận nạp ${amount} xu?`)) {
-  deposit(amount);
+  /*deposit(amount);*/
+  showBankInfo();
+  
+// Hiện thông tin ngân hàng
+  document.getElementById("bankInfo").style.display = "block";
   }
 }
 
@@ -718,7 +912,6 @@ input.addEventListener('input', updateTotalBetDisplay);
   function deposit(amount) {
   balance += amount;
   updateBalanceDisplay();
-  showNotification(`Nạp xu thành công +${amount}`);
 }
     
   function withdraw(amount) {
@@ -760,6 +953,22 @@ input.addEventListener('input', updateTotalBetDisplay);
 }
   renderWheel();
     
+// Hàm thêm kết quả vào lịch sử (giữ tối đa 12)
+  function addResultToHistory(icon) {
+  const historyEl = document.getElementById("history");
+  let results = historyEl.querySelectorAll(".result-item");
+  // Nếu đủ 12 thì xóa cái đầu tiên (cũ nhất)
+  if (results.length >= 12) {
+    results[0].remove();
+  }
+  // Thêm kết quả mới vào cuối
+  const span = document.createElement("span");
+  span.className = "result-item";
+  span.textContent = icon + " ";
+  historyEl.appendChild(span);
+}
+
+
   function spinWheel() {
   if (isSpinning) return;
   isSpinning = true;
@@ -818,8 +1027,7 @@ input.addEventListener('input', updateTotalBetDisplay);
   netLoss += Math.abs(profitOrLoss);
   }
   updateStatsDisplay();
-  
-  historyEl.innerHTML += `${selected.icon} `;
+  addResultToHistory(selected.icon);
   let outcome = winAmount > 0 ? `✅ Thắng ${winAmount}` : `❌ Thua`;
   let jackpotWin = 0;
   if (jackpot >= JACKPOT_THRESHOLD && Math.random() < JACKPOT_CHANCE) {
@@ -915,7 +1123,7 @@ input.addEventListener('input', updateTotalBetDisplay);
   }
 
 //auto quay
-  let autoTime = 35;
+  let autoTime = 10;
   let autoInterval;
   let pauseAfterSpin = false;
   let pauseTimer = 0;
@@ -931,7 +1139,7 @@ input.addEventListener('input', updateTotalBetDisplay);
   pauseTimer--;
   } 
   else {
-  autoTime = 35; // reset về 35 giây
+  autoTime = 10; // reset về 35 giây
   pauseAfterSpin = false;
   countdownEl.classList.remove("blink-yellow");
   countdownEl.textContent = `⏳ Quay thưởng sau: ${autoTime} giây`;
@@ -941,6 +1149,9 @@ input.addEventListener('input', updateTotalBetDisplay);
 // Bình thường đếm ngược 35s
   autoTime--;
   countdownEl.textContent = `⏳ Quay thưởng sau: ${autoTime} giây`;
+  if (autoTime === 7) {
+    suggestResult();
+  }
   if (autoTime <= 5) {
   countdownEl.classList.add("blink"); // đỏ nhấp nháy
   } 
