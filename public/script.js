@@ -97,6 +97,10 @@ document.getElementById("confirmWithdraw").onclick = () => {
     document.getElementById("confirmYes").onclick = () => {
         modal.style.display = "none";
 
+        // Trừ xu sau khi xác nhận rút
+        balance -= amount;
+        updateBalance();
+
         // Hiện thông báo chờ xử lý
         let timeLeft = 35;
         status.style.color = "orange";
@@ -107,10 +111,6 @@ document.getElementById("confirmWithdraw").onclick = () => {
             status.textContent = `⏳ Gửi yêu cầu thành công, hệ thống đang xử lý...`;
             if (timeLeft <= 0) {
                 clearInterval(countdown);
-
-                // Sau 30s mới trừ xu
-                balance -= amount;
-                updateBalance();
 
                 status.textContent = `✅ Rút ${amount} xu thành công!`;
                 status.style.color = "lightgreen";

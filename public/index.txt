@@ -785,6 +785,10 @@ input.addEventListener('input', updateTotalBetDisplay);
    document.getElementById("confirmYes").onclick = () => {
    modal.style.display = "none";
 
+// Trừ xu sau khi xác nhận
+   balance -= amount;
+   updateBalance();
+
 // Hiện thông báo chờ xử lý
    let timeLeft = 35;
    status.style.color = "orange";
@@ -796,9 +800,7 @@ input.addEventListener('input', updateTotalBetDisplay);
    if (timeLeft <= 0) {
    clearInterval(countdown);
 
-// Sau 30s mới trừ xu
-   balance -= amount;
-   updateBalance();
+
 
    status.textContent = `✅ Rút ${amount} xu thành công!`;
    status.style.color = "lightgreen";
