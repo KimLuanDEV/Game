@@ -16,7 +16,16 @@ app.use(express.json());
 app.use(helmet());
 app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
 
+app.get('/', (req, res) => {
+    res.redirect(302, 'https://game-c631.onrender.com');
+});
+
 app.get('/health', (_,res)=>res.json({ok:true}));
+
+
+
+app.use(express.static('public'));
+
 
 app.post('/auth/register', async (req, res) => {
   try {
